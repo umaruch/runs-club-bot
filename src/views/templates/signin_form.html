@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        function sendData(json_data) {
+            let xhr = new XMLHttpRequest();
+            xhr.open("post", "/api/forms/signin");
+            xhr.setRequestHeader("Content-Type", "application/json")
+            
+            xhr.addEventListener("readystatechange", () => {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+
+            xhr.send(json_data)
+        }
+
+    </script>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        label {
+            font-weight: bold;
+        }
+        input {
+            display: flexbox;
+            width: 90%;
+            height: 30px;
+        }
+    </style>
+    <title>Регистрация</title>
+</head>
+<body>
+    <label for="username">Ваше имя</label>
+    <input type="text" name="username" id="username">
+ </body>
+ <script>
+    let tg = window.Telegram.WebApp;
+    tg.MainButton.isVisible = true;
+    tg.MainButton.text = "Текст кнопки"
+
+    Telegram.WebApp.onEvent('mainButtonClicked', function(){
+      sendData(JSON.stringify({"new_username": document.getElementById("username").value, "user": tg.initDataUnsafe.user}));
+      //при клике на основную кнопку отправляем данные в строковом виде
+      Telegram.WebApp.close();
+   });
+
+    let i_username = document.getElementById("username");
+    i_username.value = tg.initDataUnsafe.user.username;
+
+</script>
+</html>
