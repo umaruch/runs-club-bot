@@ -1,20 +1,26 @@
-from fastapi import FastAPI
+from aiohttp.web import Application
+from aiogram import Bot, Dispatcher
+from aiogram.dispatcher.webhook import get_new_configured_app
 
 
-from src.api.v1.routers import routers
-from src.views.endpoints import pages_router
-from src.core.events import set_on_startup, set_on_shutdown
+from src.core.settings import settings
+from src.core.events import on_startup, on_shutdown
+from src.api.routers import register_bot_endpoints, register_web_endpoints
 
 
-def build_application():
-    app = FastAPI()
-    
-    for path, router in routers.items():
-        app.include_router(router, prefix=path)
+def build_application() -> Application:
+    """
+        Создание базового экземпляра приложения
+    """
+    bot = Bot(settings.bot_token)
+    dispatcher = Dispatcher(bot)
+    app = get_new_configured_app(dispatcher, settings.bot_webhook_path)
+    app["bot"] = bot
 
-    app.include_router(pages_router)
+    app.on_startup.append(on_startup)
+    app.on_shutdown.append(on_shutdown)
 
-    app.add_event_handler("startup", set_on_startup())
-    app.add_event_handler("shutdown", set_on_shutdown())
+    register_web_endpoints(app)
+    register_bot_endpoints(dispatcher)
 
     return app
